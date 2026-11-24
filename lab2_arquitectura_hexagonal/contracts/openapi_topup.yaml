@@ -1,0 +1,193 @@
+openapi: 3.1.0
+info:
+  title: Pasarela de Recarga Convergente TelCo/FinTech
+  version: 1.0.0
+  description: >
+    Especificación normativa de recargas con semántica HTTP RFC 7231
+    y control de idempotencia mediante Idempotency-Key (UUID v4).
+paths:
+  /v1/topups:
+    post:
+      summary: Crear o procesar una recarga con llave de idempotencia
+      operationId: crearRecarga
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: Identificador único de operación en formato UUID v4 para evitar cobros duplicados.
+          schema:
+            type: string
+            format: uuid
+            pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudRecarga"
+      responses:
+        "201":
+          description: Recarga creada y procesada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaRecarga"
+        "400":
+          description: Solicitud mal formada o cabecera Idempotency-Key inválida
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+        "409":
+          description: Conflicto por reutilización de Idempotency-Key con distinta carga o estado incompatible
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+        "422":
+          description: Entidad no procesable (falla de regla de dominio, p. ej., MSISDN fuera de E.164 o monto inválido)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+
+  /v1/topups/{transaction_id}:
+    parameters:
+      - name: transaction_id
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 3
+          maxLength: 64
+    put:
+      summary: Operación idempotente por identificador de transacción (RFC 7231)
+      operationId: upsertRecargaPorId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudRecargaUpsert"
+      responses:
+        "200":
+          description: Transacción actualizada o ya existente de forma idempotente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaRecarga"
+        "201":
+          description: Transacción creada mediante PUT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaRecarga"
+        "400":
+          description: Parámetros inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+        "409":
+          description: Conflicto de estado o idempotencia
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+        "422":
+          description: Violación de invariantes de dominio
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+    get:
+      summary: Consultar el estado de una recarga
+      operationId: obtenerRecarga
+      responses:
+        "200":
+          description: Transacción encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaRecarga"
+        "400":
+          description: Identificador con formato inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+        "409":
+          description: Conflicto de estado de recurso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+        "422":
+          description: Recurso no procesable en el estado actual
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorRespuesta"
+
+components:
+  schemas:
+    EstadoTransaccion:
+      type: string
+      enum: [PENDIENTE, APROBADA, RECHAZADA]
+    SolicitudRecarga:
+      type: object
+      required: [msisdn, monto_centavos]
+      additionalProperties: false
+      properties:
+        msisdn:
+          type: string
+          description: Número internacional en formato ITU-T E.164
+          pattern: "^\\+[1-9]\\d{6,14}$"
+          example: "+584121234567"
+        monto_centavos:
+          type: integer
+          format: int64
+          minimum: 100
+          description: Monto expresado estrictamente en centavos enteros
+          example: 500
+    SolicitudRecargaUpsert:
+      type: object
+      required: [idempotency_key, msisdn, monto_centavos]
+      additionalProperties: false
+      properties:
+        idempotency_key:
+          type: string
+          format: uuid
+        msisdn:
+          type: string
+          pattern: "^\\+[1-9]\\d{6,14}$"
+        monto_centavos:
+          type: integer
+          format: int64
+          minimum: 100
+    RespuestaRecarga:
+      type: object
+      required: [id, idempotency_key, msisdn, monto_centavos, estado]
+      properties:
+        id:
+          type: string
+        idempotency_key:
+          type: string
+          format: uuid
+        msisdn:
+          type: string
+        monto_centavos:
+          type: integer
+          format: int64
+        estado:
+          $ref: "#/components/schemas/EstadoTransaccion"
+        referencia_externa:
+          type: string
+    ErrorRespuesta:
+      type: object
+      required: [codigo, mensaje]
+      properties:
+        codigo:
+          type: string
+        mensaje:
+          type: string

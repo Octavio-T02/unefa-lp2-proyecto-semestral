@@ -1,0 +1,24 @@
+# Binarios compilados
+cdr_profiler
+cdr_memory_profiler
+escape_analyzer
+motor_antifraude
+*.exe
+*.out
+
+# Dependencias y builds de frontend
+node_modules/
+.next/
+.svelte-kit/
+build/
+dist/
+
+# Cache de Python
+__pycache__/
+*.pyc
+.history/.history/
+.history/
+.history/
+.history/
+.history/
+.history/
