@@ -23,4 +23,11 @@ if [ -d "lab5_ddd_grpc_y_resiliencia" ]; then
     rm -f /tmp/lab5_saga
 fi
 
+
+if [ -d "lab8_transactional_outbox_cqrs" ]; then
+    echo "[Lab 8] Verificando compilacion..."
+    go build -o /tmp/lab8_worker ./lab8_transactional_outbox_cqrs/cmd/polyglot_outbox_worker.go
+    rm -f /tmp/lab8_worker
+fi
+
 echo "=== Verificacion completada ==="
