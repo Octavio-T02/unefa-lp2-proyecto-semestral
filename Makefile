@@ -2,7 +2,7 @@
 
 PG_URL := postgres://postgres:password123@localhost:5432/unefa_bss?sslmode=disable
 
-all: lab1 lab2 lab5
+all: lab1 lab2 lab5 lab6 lab8
 
 infra-up:
 	docker compose up -d
