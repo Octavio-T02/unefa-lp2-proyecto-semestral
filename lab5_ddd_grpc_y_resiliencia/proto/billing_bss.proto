@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package unefa.telco.billing.v1;
+
+option go_package = "unefa-lp2-proyecto-semestral/lab5_ddd_grpc_y_resiliencia/proto;billingv1";
+
+service ConvergentBillingService {
+  // Unary RPC de ultra-baja latencia para autorizar y cobrar una sesión de datos 5G
+  rpc AuthorizeAndChargeDataSession (AuthorizeChargeRequest) returns (AuthorizeChargeResponse);
+
+  // Server-Side Streaming RPC para recibir eventos de telemetría de celda
+  rpc StreamCellTelemetryEvents (TelemetryStreamRequest) returns (stream CellTelemetryEvent);
+}
+
+message AuthorizeChargeRequest {
+  string idempotency_key = 1;
+  string msisdn = 2;
+  int64 monto_centavos = 3;
+  string moneda = 4;
+  int64 datos_kb = 5;
+}
+
+message AuthorizeChargeResponse {
+  string idempotency_key = 1;
+  bool autorizado = 2;
+  int64 nuevo_saldo_centavos = 3;
+  string codigo_estado = 4;
+}
+
+message TelemetryStreamRequest {
+  string idempotency_key = 1;
+  string cell_id = 2;
+}
+
+message CellTelemetryEvent {
+  string idempotency_key = 1;
+  string cell_id = 2;
+  string msisdn = 3;
+  int64 bytes_consumidos = 4;
+  int64 timestamp_unix_ms = 5;
+}
