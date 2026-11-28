@@ -7,10 +7,10 @@ Sistema distribuido de facturacion y telemetria de telecomunicaciones (BSS/5G) d
 - `lab1_memoria_y_complejidad/` — Perfilado de memoria en C y Escape Analysis en Go.
 - `lab2_arquitectura_hexagonal/` — Pasarela de recarga con arquitectura hexagonal y contrato OpenAPI 3.1.
 - `lab3_frontend_reactivo/` — Paneles reactivos (React 19 / Svelte 5) y Web Vitals *(en integracion)*.
-- `lab4_backend_poliglota/` — Modulos concurrentes poliglotas (Rust, Go, Node.js, Python y PHP) *(en integracion)*.
+- `lab4_backend_poliglota/` — Modulos concurrentes poliglotas (Rust, Go, Node.js, Python y PHP).
 - `lab5_ddd_grpc_y_resiliencia/` — Motor Saga en Go, Circuit Breaker, Jitter y contrato gRPC (`billing_bss.proto`).
 - `lab6_postgresql_bcnf_mvcc_indices/` — Esquema BCNF, Outbox, auditoria MVCC e indices.
-- `lab7_scylladb_cql_benchmark/` — Esquema CQL 5G y benchmark en Go para ScyllaDB *(pendiente de carga)*.
+- `lab7_scylladb_cql_benchmark/` — Esquema CQL 5G y benchmark en Go para ScyllaDB.
 - `lab8_transactional_outbox_cqrs/` — Worker de Transactional Outbox y CQRS.
 
 ## Comandos Principales
